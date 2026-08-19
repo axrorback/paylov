@@ -52,7 +52,7 @@ class TransactionParamsSerializer(serializers.Serializer):
 class PaylovWebhookSerializer(serializers.Serializer):
     jsonrpc = serializers.CharField()
 
-    id = serializers.IntegerField()
+    id = serializers.JSONField()
 
     method = serializers.ChoiceField(
         choices=[
