@@ -6,7 +6,8 @@ from django.utils import timezone
 from rest_framework import status
 from .models import Order
 from .serializers import OrderSerializer , PaylovWebhookSerializer
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 class OrderCreateAPIView(CreateAPIView):
 
@@ -15,7 +16,7 @@ class OrderCreateAPIView(CreateAPIView):
     serializer_class = OrderSerializer
 
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class PaylovWebhookAPIView(APIView):
     permission_classes = [AllowAny]
 
