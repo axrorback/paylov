@@ -18,6 +18,7 @@ class OrderCreateAPIView(CreateAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PaylovWebhookAPIView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     serializer_class = PaylovWebhookSerializer
