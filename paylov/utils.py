@@ -14,7 +14,9 @@ def generate_payment_link(order):
     }
 
     account_params = {
-        "order_id": str(order.id)
+        "order_id": str(order.id),
+        "amount": order.amount,
+        "purpose": "Django & DevOps Darslari uchun to'lov"
     }
 
     for key, value in account_params.items():
