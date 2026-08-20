@@ -40,7 +40,15 @@ class PaylovWebhookAPIView(APIView):
 
         if data["method"] == "transaction.perform":
             return self.transaction_perform(data)
-
+        print(data)
+        print(data["method"])
+        print(data["params"])
+        print(data["id"])
+        print(data["jsonrpc"])
+        print(data["result"])
+        print(data['account']['order_id'])
+        print(data['transaction_id'])
+        print(data['account'])
         return Response(
             {"detail": "Invalid method"},
             status=status.HTTP_400_BAD_REQUEST,
