@@ -33,7 +33,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True
     )
-
+    account_id = models.CharField(max_length=255 , null=True, blank=True)
     paid_at = models.DateTimeField(
         null=True,
         blank=True

@@ -18,6 +18,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "amount",
+            "account_id",
             "payment_url",
         )
 
@@ -34,23 +35,27 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class AccountSerializer(serializers.Serializer):
-    order_id = serializers.UUIDField()
+    order_id = serializers.CharField()
 
 
 class TransactionParamsSerializer(serializers.Serializer):
-    transaction_id = serializers.UUIDField(required=False)
+    transaction_id = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True
+    )
 
     account = AccountSerializer()
 
     amount = serializers.IntegerField()
 
-    amount_tiyin = serializers.IntegerField()
+    amount_tiyin = serializers.IntegerField(required=False, allow_null=True)
 
-    currency = serializers.IntegerField()
+    currency = serializers.IntegerField(required=False, allow_null=True)
 
 
 class PaylovWebhookSerializer(serializers.Serializer):
-    jsonrpc = serializers.CharField()
+    jsonrpc = serializers.CharField(required=False, allow_null=True)
 
     id = serializers.JSONField()
 
