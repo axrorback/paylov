@@ -11,6 +11,7 @@ def generate_payment_link(order):
         "merchant_id": settings.PAYLOV_MERCHANT_ID,
         "amount": order.amount,
         "return_url": settings.PAYLOV_RETURN_URL,
+        "currency_id":840
     }
 
     account_params = {
