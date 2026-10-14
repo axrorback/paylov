@@ -9,7 +9,6 @@ from .serializers import OrderSerializer , PaylovWebhookSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-import requests
 
 class OrderCreateAPIView(CreateAPIView):
 
@@ -126,7 +125,6 @@ class PaylovWebhookAPIView(APIView):
             "status":order.status,
             "paid_at":order.paid_at
         }
-        requests.post(order.callback_url,json=data)
 
         return Response(
             {
