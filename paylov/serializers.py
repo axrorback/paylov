@@ -20,6 +20,9 @@ class OrderSerializer(serializers.ModelSerializer):
             "amount",
             "account_id",
             "payment_url",
+            "return_url",
+            "callback_url",
+            "purpose"
         )
 
         read_only_fields = (
