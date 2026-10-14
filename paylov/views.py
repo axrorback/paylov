@@ -120,11 +120,6 @@ class PaylovWebhookAPIView(APIView):
         order.paid_at = timezone.now()
 
         order.save()
-        data = {
-            "external_service_id":order.account_id,
-            "status":order.status,
-            "paid_at":order.paid_at
-        }
 
         return Response(
             {
