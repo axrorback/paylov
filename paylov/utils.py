@@ -10,13 +10,13 @@ def generate_payment_link(order):
     query_params = {
         "merchant_id": settings.PAYLOV_MERCHANT_ID,
         "amount": order.amount,
-        "return_url": settings.PAYLOV_RETURN_URL,
+        "return_url": order.return_url,
     }
 
     account_params = {
         "order_id": str(order.id),
         "amount": order.amount,
-        "purpose": "Django & DevOps Darslari uchun to'lov",
+        "purpose": order.purpose,
         "account_id":order.account_id
     }
 
