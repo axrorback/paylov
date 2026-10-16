@@ -1,4 +1,3 @@
-
 import json
 import logging
 
@@ -11,14 +10,14 @@ _producer = None
 
 
 def get_kafka_producer():
-
     global _producer
 
     if _producer is None:
         _producer = KafkaProducer(
             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
             value_serializer=lambda value: json.dumps(
-                value
+                value,
+                default=str,
             ).encode("utf-8"),
             acks="all",
             retries=5,
