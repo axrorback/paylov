@@ -8,6 +8,11 @@ from .models import Order
 from .serializers import OrderSerializer , PaylovWebhookSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from kafka_sender import send_payment_event
+import logging
+from django.db import transaction
+
+logger = logging.getLogger(__name__)
 
 
 class OrderCreateAPIView(CreateAPIView):
@@ -93,41 +98,81 @@ class PaylovWebhookAPIView(APIView):
         )
 
     def transaction_perform(self, data):
-
         params = data["params"]
 
         order_id = params["account"]["order_id"]
         transaction_id = params["transaction_id"]
+        amount = params["amount"]
 
         try:
-            order = Order.objects.get(id=order_id)
+            with transaction.atomic():
+                order = (
+                    Order.objects
+                    .select_for_update()
+                    .get(id=order_id)
+                )
+
+                if order.amount != amount:
+                    return Response({
+                        "jsonrpc": "2.0",
+                        "id": data["id"],
+                        "result": {
+                            "status": "5",
+                            "statusText": "Invalid amount",
+                        },
+                    })
+
+
+                if order.status != Order.Status.PAID:
+                    order.status = Order.Status.PAID
+                    order.transaction_id = transaction_id
+                    order.paid_at = timezone.now()
+                    order.save(
+                        update_fields=[
+                            "status",
+                            "transaction_id",
+                            "paid_at",
+                        ]
+                    )
+
+                    event = {
+                        "event": "payment.paid",
+                        "provider": "paylov",
+                        "order_id": order.id,
+                        "transaction_id": transaction_id,
+                        "amount": order.amount,
+                        "status": "paid",
+                        "paid_at": order.paid_at.isoformat(),
+                    }
+
+                    def publish_after_commit():
+                        try:
+                            send_payment_event(event)
+                        except Exception:
+                            logger.exception(
+                                "Failed to publish Paylov event: "
+                                "order_id=%s transaction_id=%s",
+                                order.id,
+                                transaction_id,
+                            )
+
+                    transaction.on_commit(publish_after_commit)
 
         except Order.DoesNotExist:
-
-            return Response(
-                {
-                    "jsonrpc": "2.0",
-                    "id": data["id"],
-                    "result": {
-                        "status": "303",
-                        "statusText": "Order not found"
-                    }
-                }
-            )
-
-        order.status = Order.Status.PAID
-        order.transaction_id = transaction_id
-        order.paid_at = timezone.now()
-
-        order.save()
-
-        return Response(
-            {
+            return Response({
                 "jsonrpc": "2.0",
                 "id": data["id"],
                 "result": {
-                    "status": "0",
-                    "statusText": "OK"
-                }
-            }
-        )
+                    "status": "303",
+                    "statusText": "Order not found",
+                },
+            })
+
+        return Response({
+            "jsonrpc": "2.0",
+            "id": data["id"],
+            "result": {
+                "status": "0",
+                "statusText": "OK",
+            },
+        })
